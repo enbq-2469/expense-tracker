@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-income: #16a34a;
+  --color-income-light: #dcfce7;
+  --color-expense: #dc2626;
+  --color-expense-light: #fee2e2;
+  --color-background: #f9fafb;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    min-height: 100dvh;
+  }
+
+  /* Ensure all interactive elements meet 44px touch target */
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="button"],
+  a {
+    @apply min-h-touch;
+  }
+}
+
+@layer components {
+  .prose h1,
+  .prose h2,
+  .prose h3 {
+    @apply font-semibold text-gray-900;
+  }
+
+  .prose p {
+    @apply text-gray-700;
+  }
+
+  .prose code {
+    @apply bg-gray-100 rounded px-1 py-0.5 text-sm font-mono text-gray-800;
+  }
+
+  .prose pre {
+    @apply bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-gray-300 pl-4 italic text-gray-600;
+  }
+
+  .prose ul {
+    @apply list-disc list-inside;
+  }
+
+  .prose ol {
+    @apply list-decimal list-inside;
+  }
+}

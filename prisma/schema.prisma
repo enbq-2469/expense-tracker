@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+// ─────────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  categories   Category[]
+  transactions Transaction[]
+
+  @@map("users")
+}
+
+/// Global master category reference — immutable; populated by migration 002.
+/// Users never write to this table; they get a copy in their own categories on registration.
+model SystemCategory {
+  id        String       @id @default(cuid())
+  name      String
+  nameEn    String       @map("name_en")
+  type      CategoryType
+  sortOrder Int          @default(0) @map("sort_order")
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  @@unique([name, type])
+  @@map("system_categories")
+}
+
+model Category {
+  id              String       @id @default(cuid())
+  name            String
+  type            CategoryType
+  isSystemDerived Boolean      @default(false) @map("is_system_derived")
+  deletedAt       DateTime?    @map("deleted_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  transactions Transaction[]
+
+  @@index([userId, type])
+  @@map("categories")
+}
+
+model Transaction {
+  id        String       @id @default(cuid())
+  date      DateTime     @db.Date
+  note      String       @default("")
+  amountVnd Int          @map("amount_vnd")
+  type      CategoryType
+  deletedAt DateTime?    @map("deleted_at")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  categoryId String   @map("category_id")
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@index([userId, type, date])
+  @@map("transactions")
+}
