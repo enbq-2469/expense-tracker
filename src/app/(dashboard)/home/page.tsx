@@ -5,12 +5,18 @@ import { PeriodOption } from "@/types";
 import { PeriodSelector } from "@/components/charts/PeriodSelector";
 import { ExpensePieChart } from "@/components/charts/ExpensePieChart";
 import { ChartLegend } from "@/components/charts/ChartLegend";
+import { MonthlyBarChart } from "@/components/charts/MonthlyBarChart";
+import { YearSelector } from "@/components/charts/YearSelector";
 import { useDashboard } from "@/hooks/useDashboard";
+import { useMonthlyChart } from "@/hooks/useMonthlyChart";
 import { formatVnd } from "@/lib/currency";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export default function HomePage() {
   const [period, setPeriod] = useState<PeriodOption>("1m");
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const { data, loading, error } = useDashboard(period);
+  const { data: monthlyData, loading: monthlyLoading, error: monthlyError } = useMonthlyChart(selectedYear);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
@@ -108,6 +114,34 @@ export default function HomePage() {
           </div>
         </>
       )}
+
+      {/* Monthly bar chart section */}
+      <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <h2 className="text-base font-semibold text-gray-900">Thu chi theo tháng</h2>
+          <YearSelector
+            value={selectedYear}
+            availableYears={
+              monthlyData?.availableYears ?? [new Date().getFullYear()]
+            }
+            onChange={setSelectedYear}
+          />
+        </div>
+
+        {monthlyError && (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {monthlyError}
+          </div>
+        )}
+
+        {monthlyLoading && (
+          <Skeleton className="h-80 w-full rounded-xl" />
+        )}
+
+        {!monthlyLoading && monthlyData && (
+          <MonthlyBarChart months={monthlyData.months} />
+        )}
+      </div>
     </div>
   );
 }

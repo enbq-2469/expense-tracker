@@ -109,3 +109,77 @@ ORDER BY c.type, "amountVnd" DESC;
 | ------ | ------------------ | ------------------------------------------------ |
 | `401`  | `UNAUTHORIZED`     | Missing or expired access token                  |
 | `400`  | `VALIDATION_ERROR` | `period` value is not one of the allowed options |
+
+---
+
+## GET `/api/v1/dashboard/monthly`
+
+Return total income and total expense per month for all 12 months of the specified
+calendar year. Used to render the monthly grouped bar chart on the Home page (US5, FR-036–FR-041).
+
+### Query Parameters
+
+| Param  | Type   | Required | Values      | Description                                           |
+| ------ | ------ | -------- | ----------- | ----------------------------------------------------- |
+| `year` | number | ❌       | e.g. `2026` | Calendar year to aggregate. Defaults to current year. |
+
+### Success — `200 OK`
+
+```json
+{
+  "year": 2026,
+  "availableYears": [2025, 2026],
+  "months": [
+    { "month": 1, "incomeVnd": 15000000, "expenseVnd": 4250000 },
+    { "month": 2, "incomeVnd": 12000000, "expenseVnd": 5100000 },
+    { "month": 3, "incomeVnd": 16000000, "expenseVnd": 3800000 },
+    { "month": 4, "incomeVnd": 0, "expenseVnd": 0 },
+    { "month": 5, "incomeVnd": 0, "expenseVnd": 0 },
+    { "month": 6, "incomeVnd": 0, "expenseVnd": 0 },
+    { "month": 7, "incomeVnd": 0, "expenseVnd": 0 },
+    { "month": 8, "incomeVnd": 0, "expenseVnd": 0 },
+    { "month": 9, "incomeVnd": 0, "expenseVnd": 0 },
+    { "month": 10, "incomeVnd": 0, "expenseVnd": 0 },
+    { "month": 11, "incomeVnd": 0, "expenseVnd": 0 },
+    { "month": 12, "incomeVnd": 0, "expenseVnd": 0 }
+  ]
+}
+```
+
+**Response field notes**:
+
+- `months` always contains exactly **12 entries** (months 1–12) regardless of data
+  availability; missing months have `incomeVnd: 0, expenseVnd: 0` (FR-038, FR-039).
+- `availableYears` lists every distinct year in which the user has at least one
+  non-deleted transaction, always including the current calendar year (FR-037).
+  Sorted ascending. Used to populate the year-selector dropdown on the client.
+- `year` echoes back the year used for the query (useful when the client sends no param
+  and the server defaults to the current year).
+
+### SQL Aggregation (implementation reference)
+
+```sql
+-- Generate a complete 12-month spine, then LEFT JOIN actual data
+WITH months AS (
+    SELECT generate_series(1, 12) AS month
+)
+SELECT
+    m.month,
+    COALESCE(SUM(CASE WHEN t.type = 'INCOME'  THEN t.amount_vnd END), 0) AS "incomeVnd",
+    COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount_vnd END), 0) AS "expenseVnd"
+FROM months m
+LEFT JOIN transactions t
+    ON  EXTRACT(MONTH FROM t.date) = m.month
+    AND EXTRACT(YEAR  FROM t.date) = $year
+    AND t.user_id    = $userId
+    AND t.deleted_at IS NULL
+GROUP BY m.month
+ORDER BY m.month;
+```
+
+### Error Responses
+
+| Status | `code`             | Condition                                   |
+| ------ | ------------------ | ------------------------------------------- |
+| `401`  | `UNAUTHORIZED`     | Missing or expired access token             |
+| `400`  | `VALIDATION_ERROR` | `year` is not a valid 4-digit calendar year |

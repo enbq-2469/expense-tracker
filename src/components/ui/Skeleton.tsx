@@ -33,6 +33,7 @@ export function DashboardSkeleton() {
         <Skeleton className="h-80 rounded-xl" />
         <Skeleton className="h-80 rounded-xl" />
       </div>
+      <Skeleton className="h-96 rounded-xl" />
     </div>
   );
 }

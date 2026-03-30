@@ -157,6 +157,48 @@ confirming the dropdown updates accordingly.
 
 ---
 
+### User Story 5 — Monthly Income & Expense Bar Chart (Home Page) (Priority: P3)
+
+An authenticated user views a bar chart on the Home page that shows monthly income and
+expense totals across all 12 months of a chosen year, enabling them to spot seasonal
+patterns and compare months at a glance.
+
+**Why this priority**: Complements the existing pie charts by adding a time-series
+perspective. Depends on transaction data (P2) but adds independent value to the
+dashboard without blocking other features.
+
+**Independent Test**: Can be tested by pre-seeding transactions across multiple months
+of a given year, selecting that year from the dropdown, and verifying that each month's
+bars correctly reflect the summed income and expense amounts.
+
+**Acceptance Scenarios**:
+
+1. **Given** an authenticated user on the Home page, **When** the page loads, **Then**
+   a year-selection dropdown is visible above the bar chart, defaulting to the current
+   calendar year.
+2. **Given** the year dropdown is set to a year, **When** the bar chart renders, **Then**
+   it displays exactly 12 groups (January through December) on the horizontal axis.
+3. **Given** a month that has both income and expense transactions, **When** the bar
+   chart renders for that month, **Then** two adjacent bars appear side-by-side: one
+   representing total income (green) and one representing total expense (red).
+4. **Given** a month with no transactions, **When** the bar chart renders for that month,
+   **Then** both bars for that month are shown at height zero (not omitted), so the
+   12-month axis remains complete.
+5. **Given** the user selects a different year from the dropdown, **When** the selection
+   changes, **Then** the bar chart updates immediately to reflect data for the newly
+   selected year without a full page reload.
+6. **Given** a bar in the chart, **When** the user hovers over it (desktop) or taps it
+   (mobile), **Then** a tooltip displays the month name, the bar's type (Income or
+   Expense), and the exact formatted amount.
+7. **Given** a mobile viewport (< 768 px), **When** the bar chart renders, **Then** the
+   chart is horizontally scrollable or scales responsively so all 12 months remain
+   accessible without overlapping labels.
+8. **Given** no transactions exist for the selected year, **When** the bar chart renders,
+   **Then** all bars are at zero height and an empty-state note informs the user that
+   there is no data for the selected year.
+
+---
+
 ### Edge Cases
 
 - What happens when a user submits the Add/Edit transaction form with an amount of 0 or
@@ -208,6 +250,25 @@ confirming the dropdown updates accordingly.
 - **FR-012**: When no data exists for a given chart in the selected period, the chart
   area MUST display an empty-state message instead of an empty or broken chart.
 - **FR-013**: On mobile viewports, the income and expense charts MUST stack vertically.
+
+#### Home — Monthly Bar Chart
+
+- **FR-036**: The Home page MUST include a monthly bar chart section positioned below
+  the pie charts, showing income and expense totals grouped by month across a full
+  calendar year.
+- **FR-037**: A year-selection dropdown MUST appear above the bar chart. The available
+  options MUST include every year for which the user has at least one transaction, plus
+  the current calendar year. The dropdown MUST default to the current year on page load.
+- **FR-038**: The bar chart MUST display exactly 12 month groups (January–December) on
+  the horizontal axis regardless of whether data exists for every month.
+- **FR-039**: Each month group MUST render two adjacent bars: one for total income
+  (green, matching the application's income colour token `#16a34a`) and one for total
+  expense (red, matching `#dc2626`). Months with no transactions MUST show bars of zero
+  height rather than being omitted.
+- **FR-040**: Changing the year dropdown selection MUST update the bar chart without a
+  full page reload.
+- **FR-041**: Hovering over (desktop) or tapping (mobile) a bar MUST display a tooltip
+  showing the month name, bar type (Income / Expense), and the formatted amount.
 
 #### Import — Transaction Management
 
@@ -299,6 +360,9 @@ confirming the dropdown updates accordingly.
   confirmation step; no accidental one-click deletions are possible.
 - **SC-008**: Unauthenticated users are prevented from accessing any page other than
   Login and Sign Up — verified by attempting direct URL navigation.
+- **SC-009**: The monthly bar chart updates within 1 second of the user selecting a
+  different year, and displays correct totals for all 12 months matching the
+  underlying transaction data.
 
 ---
 

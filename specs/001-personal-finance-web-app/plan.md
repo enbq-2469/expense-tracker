@@ -14,8 +14,9 @@ styling, and **PostgreSQL** via **Prisma ORM** for persistent storage and schema
 The application exposes five pages (Sign Up, Login, Home, Import, Settings) to authenticated
 users. Core capabilities: JWT-based auth stored in HttpOnly cookies, CRUD transaction
 management with soft-delete, per-user category management seeded from global master data
-via a dedicated Prisma migration, pie-chart dashboards with four time-period filters, and
-Markdown rendering in transaction notes with DOMPurify sanitization.
+via a dedicated Prisma migration, pie-chart dashboards with four time-period filters, a monthly grouped bar chart with
+year-selector for time-series income/expense comparison, and Markdown rendering in
+transaction notes with DOMPurify sanitization.
 
 ---
 
@@ -25,7 +26,7 @@ Markdown rendering in transaction notes with DOMPurify sanitization.
 **Frontend Framework**: Next.js 14 (App Router, React Server Components)  
 **Styling**: Tailwind CSS v3 — single `tailwind.config.ts` token source; no inline magic numbers  
 **Markdown**: `markdown-it` v14 + `dompurify` v3 — single shared `src/lib/markdown.ts` module  
-**Charts**: `recharts` v2 — pie charts with custom colour-coded legends  
+**Charts**: `recharts` v2 — pie charts (category breakdown) + grouped bar chart (monthly income vs expense, 12-month axis, year selector)  
 **Auth**: JWT (access token 15 min, refresh token 7 days) stored in HttpOnly Secure cookies;
 passwords hashed with `bcryptjs` (cost 12)  
 **ORM & Migrations**: Prisma v5 — `prisma migrate dev` / `prisma migrate deploy`  
@@ -122,14 +123,16 @@ expense-tracker/
 │   │           │   ├── route.ts           ← GET (list by type), POST (create)
 │   │           │   └── [id]/route.ts      ← PUT (rename), DELETE (soft-delete)
 │   │           └── dashboard/
-│   │               └── summary/route.ts   ← GET (aggregated chart data)
+│   │               ├── summary/route.ts   ← GET (category breakdown, period filter)
+│   │               └── monthly/route.ts   ← GET (monthly totals, year filter)
 │   │
 │   ├── components/
 │   │   ├── ui/                        ← Button, Input, Select, Modal, ConfirmDialog
 │   │   ├── auth/                      ← LoginForm, SignUpForm
 │   │   ├── transactions/              ← TransactionList, TransactionModal, DeleteConfirm
 │   │   ├── categories/                ← CategoryList, CategoryModal
-│   │   └── charts/                    ← PieChart, PieLegend
+│   │   └── charts/                    ← PeriodSelector, ExpensePieChart, ChartLegend,
+│   │                                      MonthlyBarChart, YearSelector
 │   │
 │   ├── lib/
 │   │   ├── db.ts                      ← Prisma client singleton
@@ -142,7 +145,7 @@ expense-tracker/
 │   │       ├── transaction.schema.ts
 │   │       └── category.schema.ts
 │   │
-│   ├── hooks/                         ← useFetch, useTransactions, useCategories
+│   ├── hooks/                         ← useTransactions, useCategories, useDashboard
 │   ├── types/                         ← shared TS interfaces derived from Prisma types
 │   └── middleware.ts                  ← Next.js middleware: JWT check → redirect
 │

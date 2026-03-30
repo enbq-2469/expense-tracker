@@ -72,6 +72,18 @@ export interface ApiErrorResponse {
   linkedTransactionsCount?: number;
 }
 
+export interface MonthlyDataPoint {
+  month: number; // 1–12
+  incomeVnd: number;
+  expenseVnd: number;
+}
+
+export interface MonthlyChartResponse {
+  year: number;
+  availableYears: number[];
+  months: MonthlyDataPoint[]; // always 12 entries
+}
+
 export interface DeleteCategoryResponse {
   message: string;
   id: string;

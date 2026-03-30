@@ -121,13 +121,17 @@ module at `src/lib/markdown.ts`.
 
 ### D-006: Chart Library — Recharts v2
 
-**Decision**: Recharts for pie charts with custom colour-coded legends.
+**Decision**: Recharts for pie charts (category breakdown) and grouped bar chart (monthly
+income vs expense).
 
 **Rationale**:
 
 - Built on D3 internals but exposes a React-friendly declarative API.
-- `<PieChart>`, `<Pie>`, `<Cell>`, `<Legend>`, `<Tooltip>` cover all requirements
-  without custom SVG code.
+- **Pie charts**: `<PieChart>`, `<Pie>`, `<Cell>`, `<Tooltip>` render category-breakdown
+  charts (US3); custom `<ChartLegend>` component alongside for colour-coded labels.
+- **Bar chart**: `<BarChart>`, `<Bar>`, `<XAxis>`, `<YAxis>`, `<CartesianGrid>`,
+  `<Tooltip>` render 12-month grouped bars — two `<Bar>` elements per month group
+  (income green `#16a34a`, expense red `#dc2626`) (US5).
 - Tree-shakeable — only chart components used are bundled.
 - Responsive via `<ResponsiveContainer width="100%" height={...}>`.
 
